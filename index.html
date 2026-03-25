@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CRUD Usuarios</title>
+</head>
+<body>
+
+<h1>CRUD de Usuarios 🚀</h1>
+
+<input id="nombre" placeholder="Nombre">
+<input id="correo" placeholder="Correo">
+<input id="edad" placeholder="Edad">
+<input id="ciudad" placeholder="Ciudad">
+
+<button onclick="crearUsuario()">Crear</button>
+
+<h2>Lista de usuarios</h2>
+<ul id="lista"></ul>
+
+<script>
+const URL = "https://lab02-actividad02.onrender.com";
+
+// Obtener usuarios
+async function cargarUsuarios() {
+    const res = await fetch(URL + "/usuarios");
+    const data = await res.json();
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    data.forEach((u, i) => {
+        lista.innerHTML += `
+            <li>
+                ${u.nombre} - ${u.correo}
+                <button onclick="eliminar(${u.id})">Eliminar</button>
+            </li>
+        `;
+    });
+}
+
+// Crear usuario
+async function crearUsuario() {
+    const nombre = document.getElementById("nombre").value;
+    const correo = document.getElementById("correo").value;
+    const edad = document.getElementById("edad").value;
+    const ciudad = document.getElementById("ciudad").value;
+
+    await fetch(URL + "/usuarios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, correo, edad, ciudad })
+    });
+
+    cargarUsuarios();
+}
+
+// Eliminar usuario
+async function eliminar(id) {
+    await fetch(URL + "/usuarios/" + id, {
+        method: "DELETE"
+    });
+
+    cargarUsuarios();
+}
+
+cargarUsuarios();
+</script>
+
+</body>
+</html>
