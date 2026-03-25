@@ -17,6 +17,7 @@
             --text: #e8e8f0;
             --muted: #6b6b85;
             --danger: #ff4757;
+            --warn: #ffa502;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,7 +30,6 @@
             overflow-x: hidden;
         }
 
-        /* Grid background */
         body::before {
             content: '';
             position: fixed;
@@ -42,7 +42,6 @@
             z-index: 0;
         }
 
-        /* Glow orb */
         body::after {
             content: '';
             position: fixed;
@@ -63,7 +62,6 @@
             z-index: 1;
         }
 
-        /* Header */
         header {
             margin-bottom: 48px;
             animation: slideDown 0.6s ease both;
@@ -71,7 +69,6 @@
 
         .tag {
             display: inline-block;
-            font-family: 'DM Mono', monospace;
             font-size: 11px;
             font-weight: 500;
             letter-spacing: 0.15em;
@@ -93,9 +90,7 @@
             color: var(--text);
         }
 
-        h1 span {
-            color: var(--accent);
-        }
+        h1 span { color: var(--accent); }
 
         .subtitle {
             margin-top: 8px;
@@ -106,7 +101,6 @@
 
         /* Form card */
         .form-card {
-            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 4px;
             padding: 32px;
@@ -114,6 +108,12 @@
             animation: slideDown 0.6s 0.1s ease both;
             position: relative;
             overflow: hidden;
+            background: var(--surface);
+            transition: border-color 0.3s;
+        }
+
+        .form-card.editing {
+            border-color: var(--warn);
         }
 
         .form-card::before {
@@ -122,6 +122,11 @@
             top: 0; left: 0; right: 0;
             height: 2px;
             background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transition: background 0.3s;
+        }
+
+        .form-card.editing::before {
+            background: linear-gradient(90deg, var(--warn), #ff6b35);
         }
 
         .form-label {
@@ -131,18 +136,31 @@
             text-transform: uppercase;
             color: var(--muted);
             margin-bottom: 20px;
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
+
+        .edit-badge {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,165,2,0.1);
+            border: 1px solid rgba(255,165,2,0.3);
+            color: var(--warn);
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            padding: 3px 10px;
+            border-radius: 2px;
+        }
+
+        .form-card.editing .edit-badge { display: flex; }
 
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 14px;
             margin-bottom: 20px;
-        }
-
-        .input-wrap {
-            position: relative;
         }
 
         .input-wrap label {
@@ -174,10 +192,17 @@
             box-shadow: 0 0 0 3px rgba(108,99,255,0.12);
         }
 
-        .btn-crear {
-            width: 100%;
-            background: var(--accent);
-            color: #fff;
+        .form-card.editing input:focus {
+            border-color: var(--warn);
+            box-shadow: 0 0 0 3px rgba(255,165,2,0.1);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-crear, .btn-guardar, .btn-cancelar {
             border: none;
             border-radius: 3px;
             font-family: 'Syne', sans-serif;
@@ -185,11 +210,15 @@
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            padding: 12px;
+            padding: 12px 20px;
             cursor: pointer;
             transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-            position: relative;
-            overflow: hidden;
+        }
+
+        .btn-crear {
+            flex: 1;
+            background: var(--accent);
+            color: #fff;
         }
 
         .btn-crear:hover {
@@ -198,23 +227,38 @@
             transform: translateY(-1px);
         }
 
-        .btn-crear:active { transform: translateY(0); }
-
-        /* Ripple */
-        .btn-crear::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(255,255,255,0.08);
-            opacity: 0;
-            transition: opacity 0.2s;
+        .btn-guardar {
+            flex: 1;
+            background: var(--warn);
+            color: #000;
+            display: none;
         }
-        .btn-crear:hover::after { opacity: 1; }
 
-        /* List section */
-        .list-section {
-            animation: slideDown 0.6s 0.2s ease both;
+        .btn-guardar:hover {
+            background: #ffb829;
+            box-shadow: 0 4px 24px rgba(255,165,2,0.3);
+            transform: translateY(-1px);
         }
+
+        .btn-cancelar {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            display: none;
+        }
+
+        .btn-cancelar:hover {
+            border-color: var(--muted);
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+
+        .form-card.editing .btn-crear { display: none; }
+        .form-card.editing .btn-guardar { display: block; }
+        .form-card.editing .btn-cancelar { display: block; }
+
+        /* List */
+        .list-section { animation: slideDown 0.6s 0.2s ease both; }
 
         .list-header {
             display: flex;
@@ -239,10 +283,8 @@
             font-size: 11px;
             color: var(--muted);
             padding: 3px 10px;
-            font-family: 'DM Mono', monospace;
         }
 
-        /* User list */
         #lista {
             list-style: none;
             display: flex;
@@ -267,9 +309,14 @@
             background: var(--surface2);
         }
 
+        .user-item.being-edited {
+            border-color: var(--warn) !important;
+            background: rgba(255,165,2,0.04) !important;
+        }
+
         @keyframes itemIn {
             from { opacity: 0; transform: translateX(-12px); }
-            to { opacity: 1; transform: translateX(0); }
+            to   { opacity: 1; transform: translateX(0); }
         }
 
         .avatar {
@@ -288,10 +335,7 @@
             text-transform: uppercase;
         }
 
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
+        .user-info { flex: 1; min-width: 0; }
 
         .user-name {
             font-family: 'Syne', sans-serif;
@@ -310,10 +354,7 @@
             flex-wrap: wrap;
         }
 
-        .user-meta span {
-            font-size: 11px;
-            color: var(--muted);
-        }
+        .user-meta span { font-size: 11px; color: var(--muted); }
 
         .user-meta .pill {
             background: rgba(108,99,255,0.1);
@@ -324,10 +365,14 @@
             font-size: 10px;
         }
 
-        .btn-eliminar {
+        .item-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-editar, .btn-eliminar {
             background: transparent;
-            border: 1px solid rgba(255, 71, 87, 0.3);
-            color: var(--danger);
             border-radius: 3px;
             font-family: 'DM Mono', monospace;
             font-size: 11px;
@@ -335,7 +380,22 @@
             cursor: pointer;
             letter-spacing: 0.05em;
             transition: background 0.2s, border-color 0.2s, transform 0.15s;
-            flex-shrink: 0;
+        }
+
+        .btn-editar {
+            border: 1px solid rgba(255,165,2,0.3);
+            color: var(--warn);
+        }
+
+        .btn-editar:hover {
+            background: rgba(255,165,2,0.1);
+            border-color: var(--warn);
+            transform: scale(1.03);
+        }
+
+        .btn-eliminar {
+            border: 1px solid rgba(255,71,87,0.3);
+            color: var(--danger);
         }
 
         .btn-eliminar:hover {
@@ -344,7 +404,7 @@
             transform: scale(1.03);
         }
 
-        /* Empty state */
+        /* Empty */
         .empty {
             text-align: center;
             padding: 56px 0;
@@ -379,7 +439,6 @@
         }
         .toast.show { opacity: 1; transform: translateY(0); }
 
-        /* Loader */
         .loader {
             display: inline-block;
             width: 14px; height: 14px;
@@ -393,12 +452,13 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-18px); }
-            to { opacity: 1; transform: translateY(0); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 540px) {
             .form-grid { grid-template-columns: 1fr; }
             .user-meta { gap: 8px; }
+            .item-actions { flex-direction: column; gap: 4px; }
         }
     </style>
 </head>
@@ -410,8 +470,11 @@
         <p class="subtitle">// Gestión de registros en tiempo real</p>
     </header>
 
-    <div class="form-card">
-        <span class="form-label">+ Nuevo registro</span>
+    <div class="form-card" id="formCard">
+        <div class="form-label">
+            <span id="formLabelText">+ Nuevo registro</span>
+            <span class="edit-badge">✎ Editando usuario</span>
+        </div>
         <div class="form-grid">
             <div class="input-wrap">
                 <label for="nombre">Nombre</label>
@@ -430,7 +493,11 @@
                 <input id="ciudad" placeholder="Lima, Perú" autocomplete="off">
             </div>
         </div>
-        <button class="btn-crear" onclick="crearUsuario()">Crear Usuario</button>
+        <div class="btn-row">
+            <button class="btn-crear" onclick="crearUsuario()">Crear Usuario</button>
+            <button class="btn-cancelar" onclick="cancelarEdicion()">Cancelar</button>
+            <button class="btn-guardar" onclick="guardarEdicion()">Guardar Cambios</button>
+        </div>
     </div>
 
     <div class="list-section">
@@ -445,11 +512,14 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const URL = "https://lab02-actividad02.onrender.com";
+const API = "https://lab02-actividad02.onrender.com";
+let editingId = null;
+let editingItem = null;
 
-function showToast(msg) {
+function showToast(msg, color = "var(--accent3)") {
     const t = document.getElementById("toast");
     t.textContent = msg;
+    t.style.borderLeftColor = color;
     t.classList.add("show");
     setTimeout(() => t.classList.remove("show"), 2800);
 }
@@ -460,7 +530,7 @@ function initials(name) {
 
 async function cargarUsuarios() {
     try {
-        const res = await fetch(URL + "/usuarios");
+        const res = await fetch(API + "/usuarios");
         const data = await res.json();
         const lista = document.getElementById("lista");
         const count = document.getElementById("count");
@@ -477,6 +547,7 @@ async function cargarUsuarios() {
         data.forEach((u, i) => {
             const li = document.createElement("li");
             li.className = "user-item";
+            li.id = `item-${u.id}`;
             li.style.animationDelay = `${i * 0.05}s`;
             li.innerHTML = `
                 <div class="avatar">${initials(u.nombre || "?")}</div>
@@ -488,12 +559,84 @@ async function cargarUsuarios() {
                         ${u.ciudad ? `<span>📍 ${u.ciudad}</span>` : ""}
                     </div>
                 </div>
-                <button class="btn-eliminar" onclick="eliminar(${u.id}, this)">Eliminar</button>
+                <div class="item-actions">
+                    <button class="btn-editar" onclick="iniciarEdicion(${u.id}, '${escStr(u.nombre)}', '${escStr(u.correo)}', '${escStr(u.edad||"")}', '${escStr(u.ciudad||"")}')">Editar</button>
+                    <button class="btn-eliminar" onclick="eliminar(${u.id}, this)">Eliminar</button>
+                </div>
             `;
             lista.appendChild(li);
         });
+
+        // Re-highlight si seguimos editando
+        if (editingId) {
+            const el = document.getElementById(`item-${editingId}`);
+            if (el) el.classList.add("being-edited");
+        }
     } catch(e) {
         document.getElementById("lista").innerHTML = `<div class="empty"><span class="empty-icon">⚠</span>Error al conectar con el servidor.</div>`;
+    }
+}
+
+function escStr(s) {
+    return String(s).replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+function iniciarEdicion(id, nombre, correo, edad, ciudad) {
+    editingId = id;
+
+    document.getElementById("nombre").value = nombre;
+    document.getElementById("correo").value = correo;
+    document.getElementById("edad").value   = edad;
+    document.getElementById("ciudad").value = ciudad;
+
+    document.getElementById("formCard").classList.add("editing");
+
+    // Highlight item
+    document.querySelectorAll(".user-item").forEach(el => el.classList.remove("being-edited"));
+    const item = document.getElementById(`item-${id}`);
+    if (item) {
+        item.classList.add("being-edited");
+        item.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    // Scroll to form
+    document.getElementById("formCard").scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("nombre").focus();
+}
+
+function cancelarEdicion() {
+    editingId = null;
+    ["nombre","correo","edad","ciudad"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("formCard").classList.remove("editing");
+    document.querySelectorAll(".user-item").forEach(el => el.classList.remove("being-edited"));
+}
+
+async function guardarEdicion() {
+    const nombre = document.getElementById("nombre").value.trim();
+    const correo = document.getElementById("correo").value.trim();
+    const edad   = document.getElementById("edad").value.trim();
+    const ciudad = document.getElementById("ciudad").value.trim();
+
+    if (!nombre || !correo) { showToast("⚠ Nombre y correo son obligatorios.", "var(--warn)"); return; }
+
+    const btn = document.querySelector(".btn-guardar");
+    btn.innerHTML = `<span class="loader"></span> Guardando...`;
+    btn.disabled = true;
+
+    try {
+        await fetch(API + "/usuarios/" + editingId, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre, correo, edad, ciudad })
+        });
+        showToast(`✓ Usuario "${nombre}" actualizado.`, "var(--warn)");
+        cancelarEdicion();
+        await cargarUsuarios();
+    } catch(e) {
+        showToast("Error al actualizar el usuario.", "var(--danger)");
+    } finally {
+        btn.innerHTML = "Guardar Cambios";
+        btn.disabled = false;
     }
 }
 
@@ -503,14 +646,14 @@ async function crearUsuario() {
     const edad   = document.getElementById("edad").value.trim();
     const ciudad = document.getElementById("ciudad").value.trim();
 
-    if (!nombre || !correo) { showToast("⚠ Nombre y correo son obligatorios."); return; }
+    if (!nombre || !correo) { showToast("⚠ Nombre y correo son obligatorios.", "var(--warn)"); return; }
 
     const btn = document.querySelector(".btn-crear");
     btn.innerHTML = `<span class="loader"></span> Creando...`;
     btn.disabled = true;
 
     try {
-        await fetch(URL + "/usuarios", {
+        await fetch(API + "/usuarios", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ nombre, correo, edad, ciudad })
@@ -519,7 +662,7 @@ async function crearUsuario() {
         showToast(`✓ Usuario "${nombre}" creado.`);
         await cargarUsuarios();
     } catch(e) {
-        showToast("Error al crear el usuario.");
+        showToast("Error al crear el usuario.", "var(--danger)");
     } finally {
         btn.innerHTML = "Crear Usuario";
         btn.disabled = false;
@@ -527,18 +670,23 @@ async function crearUsuario() {
 }
 
 async function eliminar(id, btn) {
+    // No dejar eliminar si está siendo editado
+    if (id === editingId) {
+        showToast("⚠ Cancela la edición antes de eliminar.", "var(--warn)");
+        return;
+    }
     const item = btn.closest(".user-item");
     btn.textContent = "...";
     btn.disabled = true;
     try {
-        await fetch(URL + "/usuarios/" + id, { method: "DELETE" });
+        await fetch(API + "/usuarios/" + id, { method: "DELETE" });
         item.style.transition = "opacity 0.3s, transform 0.3s";
         item.style.opacity = "0";
         item.style.transform = "translateX(20px)";
         setTimeout(() => cargarUsuarios(), 320);
         showToast("✓ Usuario eliminado.");
     } catch(e) {
-        showToast("Error al eliminar.");
+        showToast("Error al eliminar.", "var(--danger)");
         btn.textContent = "Eliminar";
         btn.disabled = false;
     }
