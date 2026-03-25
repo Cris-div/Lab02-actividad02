@@ -1,70 +1,550 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRUD Usuarios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #111118;
+            --surface2: #1a1a24;
+            --border: #2a2a3a;
+            --accent: #6c63ff;
+            --accent2: #ff6584;
+            --accent3: #43e97b;
+            --text: #e8e8f0;
+            --muted: #6b6b85;
+            --danger: #ff4757;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(108,99,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(108,99,255,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Glow orb */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 48px;
+            animation: slideDown 0.6s ease both;
+        }
+
+        .tag {
+            display: inline-block;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            border: 1px solid rgba(108,99,255,0.35);
+            padding: 4px 12px;
+            border-radius: 2px;
+            margin-bottom: 16px;
+            background: rgba(108,99,255,0.07);
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .subtitle {
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--muted);
+            letter-spacing: 0.02em;
+        }
+
+        /* Form card */
+        .form-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 32px;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s 0.1s ease both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+        }
+
+        .form-label {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap label {
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            padding: 10px 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input::placeholder { color: var(--muted); opacity: 0.6; }
+
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(108,99,255,0.12);
+        }
+
+        .btn-crear {
+            width: 100%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 12px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-crear:hover {
+            background: #7c74ff;
+            box-shadow: 0 4px 24px rgba(108,99,255,0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-crear:active { transform: translateY(0); }
+
+        /* Ripple */
+        .btn-crear::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.08);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .btn-crear:hover::after { opacity: 1; }
+
+        /* List section */
+        .list-section {
+            animation: slideDown 0.6s 0.2s ease both;
+        }
+
+        .list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .list-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        .count-badge {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 11px;
+            color: var(--muted);
+            padding: 3px 10px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* User list */
+        #lista {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .user-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            animation: itemIn 0.35s ease both;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .user-item:hover {
+            border-color: rgba(108,99,255,0.3);
+            background: var(--surface2);
+        }
+
+        @keyframes itemIn {
+            from { opacity: 0; transform: translateX(-12px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 3px;
+            flex-wrap: wrap;
+        }
+
+        .user-meta span {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .user-meta .pill {
+            background: rgba(108,99,255,0.1);
+            border: 1px solid rgba(108,99,255,0.2);
+            color: var(--accent);
+            padding: 1px 7px;
+            border-radius: 2px;
+            font-size: 10px;
+        }
+
+        .btn-eliminar {
+            background: transparent;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            color: var(--danger);
+            border-radius: 3px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            padding: 6px 12px;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s;
+            flex-shrink: 0;
+        }
+
+        .btn-eliminar:hover {
+            background: rgba(255,71,87,0.1);
+            border-color: var(--danger);
+            transform: scale(1.03);
+        }
+
+        /* Empty state */
+        .empty {
+            text-align: center;
+            padding: 56px 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .empty-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+            display: block;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent3);
+            border-radius: 4px;
+            padding: 12px 18px;
+            font-size: 12px;
+            color: var(--text);
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        /* Loader */
+        .loader {
+            display: inline-block;
+            width: 14px; height: 14px;
+            border: 2px solid rgba(255,255,255,0.15);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 540px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .user-meta { gap: 8px; }
+        }
+    </style>
 </head>
 <body>
+<div class="container">
+    <header>
+        <div class="tag">Sistema de Gestión</div>
+        <h1>CRUD de <span>Usuarios</span></h1>
+        <p class="subtitle">// Gestión de registros en tiempo real</p>
+    </header>
 
-<h1>CRUD de Usuarios 🚀</h1>
+    <div class="form-card">
+        <span class="form-label">+ Nuevo registro</span>
+        <div class="form-grid">
+            <div class="input-wrap">
+                <label for="nombre">Nombre</label>
+                <input id="nombre" placeholder="Ej. Ana García" autocomplete="off">
+            </div>
+            <div class="input-wrap">
+                <label for="correo">Correo</label>
+                <input id="correo" placeholder="ana@ejemplo.com" type="email" autocomplete="off">
+            </div>
+            <div class="input-wrap">
+                <label for="edad">Edad</label>
+                <input id="edad" placeholder="25" type="number" min="1" autocomplete="off">
+            </div>
+            <div class="input-wrap">
+                <label for="ciudad">Ciudad</label>
+                <input id="ciudad" placeholder="Lima, Perú" autocomplete="off">
+            </div>
+        </div>
+        <button class="btn-crear" onclick="crearUsuario()">Crear Usuario</button>
+    </div>
 
-<input id="nombre" placeholder="Nombre">
-<input id="correo" placeholder="Correo">
-<input id="edad" placeholder="Edad">
-<input id="ciudad" placeholder="Ciudad">
+    <div class="list-section">
+        <div class="list-header">
+            <h2>Registros</h2>
+            <span class="count-badge" id="count">0 usuarios</span>
+        </div>
+        <ul id="lista"></ul>
+    </div>
+</div>
 
-<button onclick="crearUsuario()">Crear</button>
-
-<h2>Lista de usuarios</h2>
-<ul id="lista"></ul>
+<div class="toast" id="toast"></div>
 
 <script>
 const URL = "https://lab02-actividad02.onrender.com";
 
-// Obtener usuarios
+function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function initials(name) {
+    return name.split(" ").slice(0,2).map(w => w[0] || "").join("").toUpperCase() || "?";
+}
+
 async function cargarUsuarios() {
-    const res = await fetch(URL + "/usuarios");
-    const data = await res.json();
+    try {
+        const res = await fetch(URL + "/usuarios");
+        const data = await res.json();
+        const lista = document.getElementById("lista");
+        const count = document.getElementById("count");
+        lista.innerHTML = "";
 
-    const lista = document.getElementById("lista");
-    lista.innerHTML = "";
+        if (!data.length) {
+            lista.innerHTML = `<div class="empty"><span class="empty-icon">◎</span>Sin registros aún. Crea el primero.</div>`;
+            count.textContent = "0 usuarios";
+            return;
+        }
 
-    data.forEach((u, i) => {
-        lista.innerHTML += `
-            <li>
-                ${u.nombre} - ${u.correo}
-                <button onclick="eliminar(${u.id})">Eliminar</button>
-            </li>
-        `;
-    });
+        count.textContent = `${data.length} usuario${data.length !== 1 ? 's' : ''}`;
+
+        data.forEach((u, i) => {
+            const li = document.createElement("li");
+            li.className = "user-item";
+            li.style.animationDelay = `${i * 0.05}s`;
+            li.innerHTML = `
+                <div class="avatar">${initials(u.nombre || "?")}</div>
+                <div class="user-info">
+                    <div class="user-name">${u.nombre}</div>
+                    <div class="user-meta">
+                        <span>${u.correo}</span>
+                        ${u.edad ? `<span class="pill">${u.edad} años</span>` : ""}
+                        ${u.ciudad ? `<span>📍 ${u.ciudad}</span>` : ""}
+                    </div>
+                </div>
+                <button class="btn-eliminar" onclick="eliminar(${u.id}, this)">Eliminar</button>
+            `;
+            lista.appendChild(li);
+        });
+    } catch(e) {
+        document.getElementById("lista").innerHTML = `<div class="empty"><span class="empty-icon">⚠</span>Error al conectar con el servidor.</div>`;
+    }
 }
 
-// Crear usuario
 async function crearUsuario() {
-    const nombre = document.getElementById("nombre").value;
-    const correo = document.getElementById("correo").value;
-    const edad = document.getElementById("edad").value;
-    const ciudad = document.getElementById("ciudad").value;
+    const nombre = document.getElementById("nombre").value.trim();
+    const correo = document.getElementById("correo").value.trim();
+    const edad   = document.getElementById("edad").value.trim();
+    const ciudad = document.getElementById("ciudad").value.trim();
 
-    await fetch(URL + "/usuarios", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, correo, edad, ciudad })
-    });
+    if (!nombre || !correo) { showToast("⚠ Nombre y correo son obligatorios."); return; }
 
-    cargarUsuarios();
+    const btn = document.querySelector(".btn-crear");
+    btn.innerHTML = `<span class="loader"></span> Creando...`;
+    btn.disabled = true;
+
+    try {
+        await fetch(URL + "/usuarios", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre, correo, edad, ciudad })
+        });
+        ["nombre","correo","edad","ciudad"].forEach(id => document.getElementById(id).value = "");
+        showToast(`✓ Usuario "${nombre}" creado.`);
+        await cargarUsuarios();
+    } catch(e) {
+        showToast("Error al crear el usuario.");
+    } finally {
+        btn.innerHTML = "Crear Usuario";
+        btn.disabled = false;
+    }
 }
 
-// Eliminar usuario
-async function eliminar(id) {
-    await fetch(URL + "/usuarios/" + id, {
-        method: "DELETE"
-    });
-
-    cargarUsuarios();
+async function eliminar(id, btn) {
+    const item = btn.closest(".user-item");
+    btn.textContent = "...";
+    btn.disabled = true;
+    try {
+        await fetch(URL + "/usuarios/" + id, { method: "DELETE" });
+        item.style.transition = "opacity 0.3s, transform 0.3s";
+        item.style.opacity = "0";
+        item.style.transform = "translateX(20px)";
+        setTimeout(() => cargarUsuarios(), 320);
+        showToast("✓ Usuario eliminado.");
+    } catch(e) {
+        showToast("Error al eliminar.");
+        btn.textContent = "Eliminar";
+        btn.disabled = false;
+    }
 }
 
 cargarUsuarios();
 </script>
-
 </body>
 </html>

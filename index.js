@@ -5,6 +5,7 @@ const app = express();
 app.use(express.json());
 
 app.use(express.static(__dirname));
+
 // CONEXIÓN A POSTGRESQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
